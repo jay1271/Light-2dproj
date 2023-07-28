@@ -5,10 +5,17 @@ using UnityEngine.InputSystem;
 
 public class playermovement : MonoBehaviour
 {
+    
     public float movementSpeed;
 
     private float moveInputDirection;
+    float jumpForce =128.0f ;
     private Rigidbody2D rb;
+
+    //because our char is already facing right by default
+    //change to false if it is facing left by default
+    bool isFacingRight = true;
+
 
     private void Awake()
     {
@@ -21,16 +28,47 @@ public class playermovement : MonoBehaviour
     private void Update()
     {
         checkinput();
+        CheckMovementDirection();
     }
     void checkinput()
     {
         moveInputDirection = Input.GetAxisRaw("Horizontal");
+    
+        if (Input.GetButton("Jump"))
+        {
+            Jump();
+        }
     }
 
     void ApplyMovement()
     {
         rb.velocity = new Vector2(movementSpeed * moveInputDirection, rb.velocity.y);
     }
+
+    void CheckMovementDirection()
+    {
+        if(isFacingRight && moveInputDirection < 0)
+        {
+            Flip();
+        }
+
+        else if(!isFacingRight && moveInputDirection > 0)
+        {
+            Flip();
+        }
+    }
+
+    void Flip()
+    {
+        isFacingRight = !isFacingRight;
+        transform.Rotate(0.0f, 180.0f, 0.0f);
+    }
+
+    void Jump()
+    {
+        rb.velocity = new Vector2(rb.velocity.x, jumpForce);
+    }
+
     #region Old Movement
     /* public void GetControlls()
      {
