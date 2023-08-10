@@ -2,28 +2,36 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
-
+using System;
 public class playermovement : MonoBehaviour
 {
-    
+    public static Action changedstateEvent;  
+    public states states;
     public float movementSpeed;
 
     private float moveInputDirection;
     float jumpForce =128.0f ;
     private Rigidbody2D rb;
-
+    bool isFacingRight = true;
     //because our char is already facing right by default
     //change to false if it is facing left by default
-    bool isFacingRight = true;
+
 
 
     private void Awake()
     {
-        rb = GetComponent<Rigidbody2D>();
+
+        rb = GetComponent<Rigidbody2D>(); 
+    }
+    private void Start()
+    {
+        
+        changecharstate(states.idle);
     }
     private void FixedUpdate()
     {
         ApplyMovement();
+        statechangeofchar();
     }
     private void Update()
     {
@@ -32,16 +40,37 @@ public class playermovement : MonoBehaviour
     }
     void checkinput()
     {
+
         moveInputDirection = Input.GetAxisRaw("Horizontal");
-    
+
         if (Input.GetButton("Jump"))
         {
             Jump();
+        }
+
+        
+    }
+
+    private void statechangeofchar()
+    {
+        if (rb.velocity.x != 0 && rb.velocity.y == 0)
+        {
+            changecharstate(states.running);
+        }
+        else if (rb.velocity.y != 0)
+        {
+            changecharstate(states.jumping);
+        }
+        else if (rb.velocity == Vector2.zero)
+        {
+            changecharstate(states.idle);
         }
     }
 
     void ApplyMovement()
     {
+       
+      
         rb.velocity = new Vector2(movementSpeed * moveInputDirection, rb.velocity.y);
     }
 
@@ -66,7 +95,15 @@ public class playermovement : MonoBehaviour
 
     void Jump()
     {
+        
         rb.velocity = new Vector2(rb.velocity.x, jumpForce);
+    }
+
+    
+    private void changecharstate(states s)
+    {
+        states = s;
+        changedstateEvent?.Invoke();
     }
 
     #region Old Movement
